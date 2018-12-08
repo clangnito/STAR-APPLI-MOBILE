@@ -35,7 +35,7 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
 
     @Override
     public void onBindViewHolder(@NonNull BusListViewHolder busListViewHolder, int i) {
-        busListViewHolder.numLigne.setText(routes.get(i).getshortName());
+        busListViewHolder.numLigne.setText(routes.get(i).getShortName());
         busListViewHolder.numLigne.setTextColor(Color.parseColor("#"+routes.get(i).getTextColor()));
         busListViewHolder.numLigne.setBackgroundColor(Color.parseColor("#"+routes.get(i).getColor()));
         busListViewHolder.direction1.setText(routes.get(i).getLongName());
