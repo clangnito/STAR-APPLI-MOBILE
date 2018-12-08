@@ -16,13 +16,16 @@ import com.example.constantlangnito.starv1dl.Table.BusRoute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListViewHolder> {
 
     private List<BusRoute> routes;
     ArrayAdapter<String> busDirections;
     String splitor = "<>";
+    Set<String> mId;
     private BusListItemClickListener busListItemClickListener;
 
     public BusListAdapter(List<BusRoute> routes) {
@@ -43,12 +46,20 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
 
     @Override
     public void onBindViewHolder(@NonNull BusListViewHolder busListViewHolder, int position) {
-        BusRoute busRoute = routes.get(position);
+        final BusRoute busRoute = routes.get(position);
         busListViewHolder.numLigne.setText(busRoute.getShortName());
         busListViewHolder.numLigne.setTextColor(Color.parseColor("#" + busRoute.getTextColor()));
         busListViewHolder.numLigne.setBackgroundColor(Color.parseColor("#" + busRoute.getColor()));
-        busDirections.addAll(getDirections(busRoute.getLongName()));
-        busDirections.notifyDataSetChanged();
+        busDirections.clear();
+        if(!mId.contains(busRoute.getShortName())){
+            mId.add(busRoute.getShortName());
+            busDirections.addAll(getDirections(busRoute.getLongName()));
+            busDirections.notifyDataSetChanged();
+        }else{
+            mId.remove(busRoute.getShortName());
+            busDirections.clear();
+            busDirections.notifyDataSetChanged();
+        }
         //busListViewHolder.direction2.setText((routes.get(i).getLongName().split("<>").length>1)?"<<"+routes.get(i).getLongName().split("<>")[1] : "");
     }
 
@@ -70,6 +81,7 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
 
         public BusListViewHolder(@NonNull View itemView) {
             super(itemView);
+            mId = new HashSet<String>();
             numLigne = itemView.findViewById(R.id.numLigne);
             directionsSP = itemView.findViewById(R.id.directions);
             busDirections = new ArrayAdapter<>(itemView.getContext(), android.R.layout.simple_spinner_item);
