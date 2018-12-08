@@ -39,15 +39,15 @@ public class ListerBusMetro extends AppCompatActivity {
         setContentView(R.layout.activity_lister_bus_metro);
 
         db = new DatabaseHelper(this);
-
         ArrayList list = db.getBusRoutesFromDatabase();
-
-        lv = findViewById(R.id.recycler_viewBusMetro);
-        lv.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
-        lv.setLayoutManager(layoutManager);
-        adapter = new BusListAdapter(list);
-        lv.setAdapter(adapter);
+        if(list != null){
+            lv = findViewById(R.id.recycler_viewBusMetro);
+            lv.setHasFixedSize(true);
+            layoutManager = new LinearLayoutManager(this);
+            lv.setLayoutManager(layoutManager);
+            adapter = new BusListAdapter(list);
+            lv.setAdapter(adapter);
+        }
     }
 
     @Override

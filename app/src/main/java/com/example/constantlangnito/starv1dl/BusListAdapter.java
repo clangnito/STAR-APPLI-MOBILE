@@ -3,10 +3,12 @@ package com.example.constantlangnito.starv1dl;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
 
@@ -34,11 +36,18 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BusListViewHolder busListViewHolder, int i) {
-        busListViewHolder.numLigne.setText(routes.get(i).getShortName());
-        busListViewHolder.numLigne.setTextColor(Color.parseColor("#"+routes.get(i).getTextColor()));
-        busListViewHolder.numLigne.setBackgroundColor(Color.parseColor("#"+routes.get(i).getColor()));
-        busListViewHolder.direction1.setText(routes.get(i).getLongName());
+    public void onBindViewHolder(@NonNull BusListViewHolder busListViewHolder, int position) {
+        BusRoute busRoute = routes.get(position);
+        busListViewHolder.numLigne.setText(busRoute.getShortName());
+        busListViewHolder.numLigne.setTextColor(Color.parseColor("#"+ busRoute.getTextColor()));
+        busListViewHolder.numLigne.setBackgroundColor(Color.parseColor("#"+ busRoute.getColor()));
+        busListViewHolder.direction1.setText(busRoute.getLongName());
+        busListViewHolder.direction1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("test","onclick");
+            }
+        });
         //busListViewHolder.direction2.setText((routes.get(i).getLongName().split("<>").length>1)?"<<"+routes.get(i).getLongName().split("<>")[1] : "");
     }
 
