@@ -14,15 +14,22 @@ import java.util.zip.ZipInputStream;
  */
 
 
-public class DecompressFast {
+public class DecompresZip {
 
     private String _zipFile;
     private String _location;
 
-    public DecompressFast(String zipFile, String location) {
+    public DecompresZip(String zipFile, String location) {
         _zipFile = zipFile;
         _location = location;
         _dirChecker("");
+    }
+
+    private void _dirChecker(String dir) {
+        File f = new File(_location + dir);
+        if (!f.isDirectory()) {
+            f.mkdirs();
+        }
     }
 
     public boolean unzip() {
@@ -31,7 +38,7 @@ public class DecompressFast {
             ZipInputStream zin = new ZipInputStream(fin);
             ZipEntry ze = null;
             while ((ze = zin.getNextEntry()) != null) {
-                Log.v("XXXXDecompress", "Unzipping " + ze.getName());
+                Log.v("Decompress", "Unzipping " + ze.getName());
 
                 if (ze.isDirectory()) {
                     _dirChecker(ze.getName());
@@ -49,23 +56,15 @@ public class DecompressFast {
                 }
             }
             zin.close();
-            Log.d("XXXXUnzip", "Dezipping complete. path :  " + _location);
+            Log.d("Unzip", "Dezipping end. path :  " + _location);
             return true ;
         } catch (Exception e) {
-            Log.e("XXXXDecompress", "dezip", e);
 
-            Log.d("XXXXUnzip", "Dezipping failed");
         }
         return false ;
 
     }
 
-    private void _dirChecker(String dir) {
-        File f = new File(_location + dir);
 
-        if (!f.isDirectory()) {
-            f.mkdirs();
-        }
-    }
 
 }

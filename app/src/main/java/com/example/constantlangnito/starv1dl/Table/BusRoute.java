@@ -1,7 +1,7 @@
 package com.example.constantlangnito.starv1dl.Table;
 
 /**
- * Created by diarranabe on 20/11/2017.
+ * Created by langnito on 02/12/2018.
  */
 
 public class BusRoute {
@@ -26,11 +26,11 @@ public class BusRoute {
     }
 
 
-    public String getShortName() {
+    public String getshortName() {
         return shortName;
     }
 
-    public void setShortName(String shortName) {
+    public void setshortName(String shortName) {
         this.shortName = shortName;
     }
 

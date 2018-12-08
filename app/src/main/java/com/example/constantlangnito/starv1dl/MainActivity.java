@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
-import android.preference.PreferenceActivity;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.widget.Button;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.BinaryHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public static Button buttonLister;
     private ProgressDialog mProgressDialog;
 
-    DatabaseHelper databaseHelper;
+    DatabaseManager databaseHelper;
 
     private String exportPath = "";
 
@@ -45,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-        databaseHelper = new DatabaseHelper(getApplicationContext());
+        databaseHelper = new DatabaseManager(getApplicationContext());
         activerPermissions(this);
 
         onNewIntent(getIntent());
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                         file.mkdir();
                     }
 
-                   // DatabaseHelper.INIT_FOLDER_PATH = INIT_FOLDER_PATH + DestinationName.substring(0, DestinationName.lastIndexOf(".")) + "/";
+                   // DatabaseManager.INIT_FOLDER_PATH = INIT_FOLDER_PATH + DestinationName.substring(0, DestinationName.lastIndexOf(".")) + "/";
                     //Saving a File into Download Folder
 
 
@@ -118,17 +116,17 @@ public class MainActivity extends AppCompatActivity {
                     exportPath = exportPath.replace(".zip", "");
                     Log.e("STARX", "==> " + exportPath);
 
-                    //DatabaseHelper.DOWNLOAD_PATH = exportPath;
+                    //DatabaseManager.DOWNLOAD_PATH = exportPath;
                     exportPath = exportPath + "/";
 
                     // decropress file in folder whith id name
-                    DecompressFast df = new DecompressFast(_f.getAbsolutePath(), exportPath);
+                    DecompresZip df = new DecompresZip(_f.getAbsolutePath(), exportPath);
                     df.unzip();
 
                     /**
                      * Inserer les données télechargées
                      */
-                    DatabaseHelper databaseHelper = new DatabaseHelper(getApplicationContext());
+                    DatabaseManager databaseHelper = new DatabaseManager(getApplicationContext());
                     databaseHelper.insertAll();
                     dismissDialog(DIALOG_DOWNLOAD_PROGRESS);
                     mProgressDialog.dismiss();
