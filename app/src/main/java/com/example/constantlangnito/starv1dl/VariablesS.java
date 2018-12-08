@@ -4,7 +4,7 @@ package com.example.constantlangnito.starv1dl;
  * Created by diarranabe on 20/11/2017.
  */
 
-public class Constants implements StarContract {
+public class VariablesS implements StarContract {
     public static final String CREATE_BUS_ROUTE_TABLE = "CREATE TABLE IF NOT EXISTS " + BusRoutes.CONTENT_PATH +
             "(_id INTEGER NOT NULL PRIMARY KEY," +
             "route_id TEXT, " +

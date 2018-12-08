@@ -1,4 +1,4 @@
-package com.example.constantlangnito.starv1dl;
+package com.example.constantlangnito.starv1dl.Table;
 
 /**
  * Created by diarranabe on 20/11/2017.

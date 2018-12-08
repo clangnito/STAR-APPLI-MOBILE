@@ -23,7 +23,7 @@
         <activity
             android:name=".ListerBusMetro"
             android:label="@string/title_activity_lister_bus_metro"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

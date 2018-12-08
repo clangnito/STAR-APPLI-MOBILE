@@ -6,24 +6,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.os.Bundle;
 import android.util.Log;
 
+import com.example.constantlangnito.starv1dl.Table.BusRoute;
+
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-
-
-
 
 import static android.os.Environment.getExternalStorageDirectory;
 
@@ -59,24 +51,24 @@ public class DatabaseHelper extends SQLiteOpenHelper implements StarContract {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d("DB_T_ROUTE_TABLE", "db cretaed");
-        db.execSQL(Constants.CREATE_BUS_ROUTE_TABLE);
+        db.execSQL(VariablesS.CREATE_BUS_ROUTE_TABLE);
         Log.d("CREATE_BUS_ROUTE_TABLE", "db cretaed");
-        /*db.execSQL(Constants.CREATE_CALENDAR_TABLE);
-        db.execSQL(Constants.CREATE_STOP_TIMES_TABLE);
-        db.execSQL(Constants.CREATE_STOPS_TABLE);
-        db.execSQL(Constants.CREATE_TRIPS_TABLE);
-        db.execSQL(Constants.CREATE_VERSIONS_TABLE);*/
+        /*db.execSQL(VariablesS.CREATE_CALENDAR_TABLE);
+        db.execSQL(VariablesS.CREATE_STOP_TIMES_TABLE);
+        db.execSQL(VariablesS.CREATE_STOPS_TABLE);
+        db.execSQL(VariablesS.CREATE_TRIPS_TABLE);
+        db.execSQL(VariablesS.CREATE_VERSIONS_TABLE);*/
         /*
           Initialisation des versions
 
         ContentValues values = new ContentValues();
         ContentValues values2 = new ContentValues();
-        values.put(Constants.VERSIONS_FILE_NAME_COL, "file1");
-        values2.put(Constants.VERSIONS_FILE_NAME_COL, "file2");
-        values.put(Constants.VERSIONS_FILE_VERSION_COL, Constants.DEFAULT_FIRST_VERSION);
-        values2.put(Constants.VERSIONS_FILE_VERSION_COL, Constants.DEFAULT_FIRST_VERSION);
-        db.insert(Constants.VERSIONS_TABLE, null, values);
-        db.insert(Constants.VERSIONS_TABLE, null, values2);
+        values.put(VariablesS.VERSIONS_FILE_NAME_COL, "file1");
+        values2.put(VariablesS.VERSIONS_FILE_NAME_COL, "file2");
+        values.put(VariablesS.VERSIONS_FILE_VERSION_COL, VariablesS.DEFAULT_FIRST_VERSION);
+        values2.put(VariablesS.VERSIONS_FILE_VERSION_COL, VariablesS.DEFAULT_FIRST_VERSION);
+        db.insert(VariablesS.VERSIONS_TABLE, null, values);
+        db.insert(VariablesS.VERSIONS_TABLE, null, values2);
         Log.d("STARX", "db cretaed");*/
     }
 
@@ -103,8 +95,8 @@ public class DatabaseHelper extends SQLiteOpenHelper implements StarContract {
      * Insert toutes les données disponibles dans le dossier
      */
     public void insertAll() {
-       // insertStopTimes();
-       // insertCalendars();
+        // insertStopTimes();
+        // insertCalendars();
         insertBusRoutes();
         //insertStops();
         //insertTrips();
@@ -112,11 +104,11 @@ public class DatabaseHelper extends SQLiteOpenHelper implements StarContract {
         /**
          * Supprime les données après leurs insertion
 
-        try {
-            deleteDirectory(new File(DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+         try {
+         deleteDirectory(new File(DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH));
+         } catch (IOException e) {
+         e.printStackTrace();
+         }*/
     }
 
     /**
@@ -190,7 +182,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements StarContract {
     public static ArrayList<BusRoute> loadBusRoutesData() throws IOException {
         Log.d("STARXC", "start loading... " + DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH + DOWNLOAD_PATH + "/" + BUS_ROUTES_CSV_FILE);
         ArrayList<BusRoute> busRoutes = new ArrayList<>();
-        FileReader file = new FileReader(new File(DEVICE_ROOT_FOLDER, INIT_FOLDER_PATH + DOWNLOAD_PATH  + "/" + BUS_ROUTES_CSV_FILE));
+        FileReader file = new FileReader(new File(DEVICE_ROOT_FOLDER, INIT_FOLDER_PATH + DOWNLOAD_PATH + "/" + BUS_ROUTES_CSV_FILE));
         BufferedReader buffer = new BufferedReader(file);
         String line = "";
         int i = 0;
@@ -238,18 +230,18 @@ public class DatabaseHelper extends SQLiteOpenHelper implements StarContract {
                         cursor.getString(cursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR))
                 );
                 data.add(item);
-                Log.d("STARX", "load from db..." + item);
+                //Log.d("STARX", "load from db..." + item);
             } while (cursor.moveToNext());
-            Log.d("STARX", "-----   " + data.size() + " BusRoutes loaded form database ");
+            // Log.d("STARX", "-----   " + data.size() + " BusRoutes loaded form database ");
         }
         cursor.close();
         return data;
     }
 
 
-
     /**
      * Supprimer un dossier
+     *
      * @param file
      * @throws IOException
      */

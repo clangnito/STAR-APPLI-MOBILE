@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.CountDownTimer;
 import android.preference.PreferenceActivity;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -45,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         databaseHelper = new DatabaseHelper(getApplicationContext());
-        verifyStoragePermissions(this);
+        activerPermissions(this);
+
+        onNewIntent(getIntent());
 
         buttonTelecharger = (Button)findViewById(R.id.button_telechargement);
         buttonLister = (Button)findViewById(R.id.button_listerBus);
@@ -129,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
                     databaseHelper.insertAll();
                     dismissDialog(DIALOG_DOWNLOAD_PROGRESS);
                     mProgressDialog.dismiss();
-
+                    buttonTelecharger.setText("fin de telechargement");
                 } catch (IOException e) {
                     Log.e("STARX", "success catch");
                     e.printStackTrace();
@@ -166,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public static void verifyStoragePermissions(Activity activity) {
+    public static void activerPermissions(Activity activity) {
         // Check if we have read or write permission
         int writePermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int readPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -179,6 +182,30 @@ public class MainActivity extends AppCompatActivity {
                     REQUEST_EXTERNAL_STORAGE
             );
         }
+    }
+
+    /**
+     * Losrqu'on clic sur la notif de mise à jour
+     *
+     * @param intent
+     */
+    public void onNewIntent(Intent intent) {
+
+        new CountDownTimer(15000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                int hours = (int) millisUntilFinished / (60 * 60 * 1000);
+                int diff = (int) millisUntilFinished - hours * (60 * 60 * 1000);
+                int min = (int) diff / (60 * 1000);
+                int sec = (int) (diff - min * 60 * 1000) / 1000;
+                buttonTelecharger.setText("verification nouvelle version : "+hours + ":" + min + ":" + sec);
+            }
+
+            public void onFinish() {
+                buttonTelecharger.setText("Telecharger nouvelle version");
+            }
+        }.start();
+
     }
 
     /**
