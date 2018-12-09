@@ -1,5 +1,6 @@
 package com.example.constantlangnito.starv1dl;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -26,10 +27,12 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
     ArrayAdapter<String> busDirections;
     String splitor = "<>";
     Set<String> mId;
+    Context mContext;
     private BusListItemClickListener busListItemClickListener;
 
-    public BusListAdapter(List<BusRoute> routes) {
+    public BusListAdapter(@NonNull Context context,final List<BusRoute> routes) {
         this.routes = routes;
+        this.mContext = context;
     }
 
     public void setOnClickListener(BusListItemClickListener busListItemClickListener) {
@@ -40,33 +43,28 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
     @NonNull
     @Override
     public BusListViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.line, viewGroup, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.line, viewGroup, false);
         return new BusListViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull BusListViewHolder busListViewHolder, int position) {
-        final BusRoute busRoute = routes.get(position);
-        busListViewHolder.numLigne.setText(busRoute.getShortName());
-        busListViewHolder.numLigne.setTextColor(Color.parseColor("#" + busRoute.getTextColor()));
-        busListViewHolder.numLigne.setBackgroundColor(Color.parseColor("#" + busRoute.getColor()));
-        busDirections.clear();
-        if(!mId.contains(busRoute.getShortName())){
-            mId.add(busRoute.getShortName());
-            busDirections.addAll(getDirections(busRoute.getLongName()));
-            busDirections.notifyDataSetChanged();
-        }else{
-            mId.remove(busRoute.getShortName());
+        final BusRoute busRoute = routes != null ? routes.get(busListViewHolder.getAdapterPosition()) : null;
+        if (busRoute != null) {
+            busListViewHolder.numLigneTV.setText(busRoute.getShortName());
+            busListViewHolder.numLigneTV.setTextColor(Color.parseColor("#" + busRoute.getTextColor()));
+            busListViewHolder.numLigneTV.setBackgroundColor(Color.parseColor("#" + busRoute.getColor()));
             busDirections.clear();
+            busDirections.addAll(getDirections(busRoute.getLongName()));
+            Log.e("direction",busRoute.getLongName());
             busDirections.notifyDataSetChanged();
         }
-        //busListViewHolder.direction2.setText((routes.get(i).getLongName().split("<>").length>1)?"<<"+routes.get(i).getLongName().split("<>")[1] : "");
     }
 
 
     @Override
     public int getItemCount() {
-        return routes.size();
+        return routes != null ? routes.size() : 0;
     }
 
     public interface BusListItemClickListener {
@@ -74,25 +72,19 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
     }
 
 
-    public class BusListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        protected TextView numLigne;
+    public class BusListViewHolder extends RecyclerView.ViewHolder {
+        protected TextView numLigneTV;
         protected Spinner directionsSP;
 
 
         public BusListViewHolder(@NonNull View itemView) {
             super(itemView);
-            mId = new HashSet<String>();
-            numLigne = itemView.findViewById(R.id.numLigne);
+            mId = new HashSet<>();
+            numLigneTV = itemView.findViewById(R.id.numLigne);
             directionsSP = itemView.findViewById(R.id.directions);
-            busDirections = new ArrayAdapter<>(itemView.getContext(), android.R.layout.simple_spinner_item);
+            busDirections = new ArrayAdapter<>(mContext, android.R.layout.simple_spinner_item);
             busDirections.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             directionsSP.setAdapter(busDirections);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            busListItemClickListener.onItemClick(getLayoutPosition(), v);
         }
     }
 

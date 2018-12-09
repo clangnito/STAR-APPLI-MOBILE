@@ -45,7 +45,7 @@ public class ListerBusMetro extends AppCompatActivity {
             lv.setHasFixedSize(true);
             layoutManager = new LinearLayoutManager(this);
             lv.setLayoutManager(layoutManager);
-            adapter = new BusListAdapter(list);
+            adapter = new BusListAdapter(this,list);
             lv.setAdapter(adapter);
         }
     }
