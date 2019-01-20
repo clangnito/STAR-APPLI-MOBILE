@@ -22,7 +22,10 @@ import com.loopj.android.http.BinaryHttpResponseHandler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import android.app.ProgressDialog;
@@ -109,18 +112,28 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         buttonLister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, ListerBusMetro.class));
+                startActivity(new Intent(MainActivity.this, ListeArretBus.class));
             }
         });
+
+
+        Date actuelle = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat dateFormatHeur = new SimpleDateFormat("HH:mm");
+
+        editText_Date.setText(dateFormat.format(actuelle));
+        editText_Heure.setText(dateFormatHeur.format(actuelle));
+        editText_Date.setEnabled(false);
+        editText_Heure.setEnabled(false);
 
         buttonListerArretBus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Cursor list = databaseHelper.getArretBusForBusDatabase();
-                Intent intent = new Intent(MainActivity.this, fragment3.class);
+                Intent intent = new Intent(MainActivity.this, ListeArretBus.class);
                 Bundle vals = new Bundle();
-                vals.putString("dateDepart","0004");
-                vals.putString("heureDepart","1");
+                vals.putString("dateDepart",editText_Date.getText().toString());
+                vals.putString("heureDepart",editText_Heure.getText().toString());
                 vals.putInt("positionBusSelect",positionBusSelect);
                 vals.putInt("positionDirectionSelect", positionDirectionSelect);
                 intent.putExtras(vals);
@@ -143,9 +156,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 dpd = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int myear, int mmonth, int mdayOfMonth) {
-                        editText_Date.setText(mdayOfMonth +"/" + mmonth+1 +"/" + myear );
+                        editText_Date.setText(formatJrHrInf9(mdayOfMonth) +"/" + mmonth+1 +"/" + myear );
                     }
-                },day, month, year);
+                },year, month, day);
                 dpd.show();
             }
         });
@@ -162,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int mhourOfDay, int mminute) {
-                        editText_Heure.setText(mhourOfDay + ":" + mminute);
+                        editText_Heure.setText(formatJrHrInf9(mhourOfDay) + ":" +  formatJrHrInf9(mminute));
                     }
                 },heure,minute,false);
                 timePickerDialog.show();
@@ -189,6 +202,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
 
 
+    }
+
+    private String formatJrHrInf9(int val) {
+        if (val < 9) {
+            return "0"+val;
+        } else {
+            return (Integer.toString(val));
+        }
     }
 
 

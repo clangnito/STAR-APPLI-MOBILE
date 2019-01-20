@@ -1,5 +1,6 @@
 package com.example.constantlangnito.starv1dl;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -7,8 +8,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
 
@@ -23,6 +26,13 @@ public class ListeArretBus extends AppCompatActivity {
     RecyclerView.Adapter adapter ;
     RecyclerView.LayoutManager layoutManager;
 
+    String dateDepart ;
+    String heureDepart ;
+    int positionBusSelect ;
+    int positionDirectionSelect ;
+    String Route_id;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,10 +41,10 @@ public class ListeArretBus extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         Bundle vals = getIntent().getExtras();
-        String dateDepart = vals.getString("dateDepart");
-        String heureDepart = vals.getString("heureDepart");
-        int positionBusSelect = vals.getInt("positionBusSelect");
-        int positionDirectionSelect = vals.getInt("positionDirectionSelect");
+        dateDepart = vals.getString("dateDepart");
+        heureDepart = vals.getString("heureDepart");
+        positionBusSelect = vals.getInt("positionBusSelect");
+        positionDirectionSelect = vals.getInt("positionDirectionSelect");
 
         db = new DatabaseManager(this,"");
 
@@ -43,7 +53,7 @@ public class ListeArretBus extends AppCompatActivity {
         BusRoute busRoute = listeBusDataBase.get(positionBusSelect);
 
         String idBus = busRoute.getRoute_id();
-
+        Route_id = idBus;
         ArrayList list = db.getArretBusForBusDatabase(idBus,Integer.toString(positionDirectionSelect) );
 
         lv = findViewById(R.id.recycler_viewListeArretBus);
@@ -54,6 +64,27 @@ public class ListeArretBus extends AppCompatActivity {
         lv.setAdapter(adapter);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((ArretBusAdapter) adapter).setOnClickListener(new ArretBusAdapter.ArretBusItemClickListener() {
+            @Override
+            public void onItemClick(int possition, View view) {
+                Toast.makeText(ListeArretBus.this, "Selectionnez une ligne "+possition, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(ListeArretBus.this, fragment3.class);
+                Bundle vals = new Bundle();
+                vals.putString("dateDepart",dateDepart);
+                vals.putString("heureDepart",heureDepart);
+                vals.putInt("positionBusSelect",positionBusSelect);
+                vals.putInt("positionDirectionSelect", positionDirectionSelect);
+                vals.putInt("positionArretSelect", possition);
+                vals.putString("Route_id", Route_id);
+                intent.putExtras(vals);
+                startActivity(intent);
+            }
+        });
+    }
 
 
 }

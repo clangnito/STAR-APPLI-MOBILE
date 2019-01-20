@@ -17,8 +17,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static android.os.Environment.getExternalStorageDirectory;
@@ -558,13 +561,12 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
      * @return
      */
     public ArrayList<Stop> getArretBusForBusDatabase(String idBus, String direction) {
-        String selectQuery = "SELECT DISTINCT " + Stops.CONTENT_PATH +
-                             ".* FROM " + Trips.CONTENT_PATH + "," + StopTimes.CONTENT_PATH + "," + Stops.CONTENT_PATH +
-                             " WHERE " + Trips.CONTENT_PATH + "." + Trips.TripColumns.TRIP_ID + "=" + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.TRIP_ID +
-                             " AND " + Stops.CONTENT_PATH + "." + Stops.StopColumns.STOP_ID + "=" + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_ID +
-                             " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.ROUTE_ID + " = '"+idBus+"' " +
-                             " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.DIRECTION_ID + " = '"+direction+"' " +
-                            "ORDER BY " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_SEQUENCE +" DESC";
+        String selectQuery = "SELECT DISTINCT s.* FROM " + Trips.CONTENT_PATH + " t ," + StopTimes.CONTENT_PATH + " st," + Stops.CONTENT_PATH +
+                             " s WHERE t." + Trips.TripColumns.TRIP_ID + "=st." + StopTimes.StopTimeColumns.TRIP_ID +
+                             " AND s." + Stops.StopColumns.STOP_ID + "=st." + StopTimes.StopTimeColumns.STOP_ID +
+                             " AND t." + Trips.TripColumns.ROUTE_ID + " = '"+idBus+"' " +
+                             " AND t." + Trips.TripColumns.DIRECTION_ID + " = '"+direction+"' " +
+                            "ORDER BY st." + StopTimes.StopTimeColumns.STOP_SEQUENCE +" DESC";
         ArrayList<Stop> data = new ArrayList<>();
 
         try(Cursor cursor = this.getWritableDatabase().rawQuery(selectQuery, null)){
@@ -586,16 +588,24 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
 
 
 
-    public ArrayList<StopTime> getHeurePassageFromDatabase(String idBus, String direction) {
+    public ArrayList<StopTime> getHeurePassageFromDatabase(String dateDepart, String heureDepart, int positionBusSelect, int positionDirectionSelect,int positionArretSelect,String idBus) {
+
+
+        /*ArrayList<Stop> listeStopDataBase = this.getArretBusForBusDatabase(,positionArretSelect);
+
+        BusRoute busRoute = listeBusDataBase.get(positionBusSelect);
+
+        String idBus = busRoute.getRoute_id();*/
+
         String selectQuery = "SELECT " + StopTimes.CONTENT_PATH +
                 ".*, calendar.start_date, calendar.end_date  FROM " + StopTimes.CONTENT_PATH + "," + Trips.CONTENT_PATH + "," + Calendar.CONTENT_PATH +
                 " WHERE " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.TRIP_ID + "=" + Trips.CONTENT_PATH + "." + Trips.TripColumns.TRIP_ID +
                 " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.SERVICE_ID + "=" + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.SERVICE_ID +
                 " AND " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_ID + " = '1188' " +
-                " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.ROUTE_ID + " = '0004' " +
-                " AND time("+ StopTimes.CONTENT_PATH +"."+ StopTimes.StopTimeColumns.ARRIVAL_TIME +") >= time('10:40')" +
-                " AND " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.START_DATE + " <= current_date " +
-                " AND current_date <= " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.END_DATE +
+                " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.ROUTE_ID + " = '"+idBus+"' " +
+                " AND time("+ StopTimes.CONTENT_PATH +"."+ StopTimes.StopTimeColumns.ARRIVAL_TIME +") >= time('"+heureDepart+"')" +
+                " AND " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.START_DATE + " <= '"+ formatDateStar(dateDepart) +"' " +
+                " AND '"+formatDateStar(dateDepart)+"' <= " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.END_DATE +
                 " AND " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.SATURDAY + " = 1 " +
                 "ORDER BY " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.ARRIVAL_TIME +" asc";
         ArrayList<StopTime> data = new ArrayList<>();
@@ -615,6 +625,11 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
         }
 
         return data;
+    }
+
+    private String formatDateStar (String date){
+        String[] parts = date.split("/");
+        return parts[2]+parts[1]+parts[0];
     }
 
 
