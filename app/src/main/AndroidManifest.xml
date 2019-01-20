@@ -24,6 +24,14 @@
             android:name=".ListerBusMetro"
             android:label="@string/title_activity_lister_bus_metro"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ListeArretBus"
+            android:label="@string/title_activity_liste_arret_bus"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".fragment3"
+            android:label="@string/title_activity_fragment3"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

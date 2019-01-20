@@ -6,99 +6,92 @@ package com.example.constantlangnito.starv1dl.Table;
 
 public class Trip {
 
-    private int tripId;
-    private int routeId;
-    private int serviceId;
-    private String headSign;
-    private  int directionId;
-    private String blockId;
-    private String wheelchairAccessible;
+    //route_id,service_id,trip_id,trip_headsign,trip_short_name,direction_id,block_id,shape_id,wheelchair_accessible,bikes_allowed
+    private int trip_id;
+    private int route_id;
+    private int service_id;
+    private String trip_headsign;
+    private  int direction_id;
+    private String block_id;
+    private String wheelchair_accessible;
 
     public Trip(int tripId, int routeId, int serviceId, String headSign, int directionId, String blockId, String wheelchairAccessible) {
-        this.tripId = tripId;
-        this.routeId = routeId;
-        this.serviceId = serviceId;
-        this.headSign = headSign;
-        this.directionId = directionId;
-        this.blockId = blockId;
-        this.wheelchairAccessible = wheelchairAccessible;
+        this.trip_id = tripId;
+        this.route_id = routeId;
+        this.service_id = serviceId;
+        this.trip_headsign = headSign;
+        this.direction_id = directionId;
+        this.block_id = blockId;
+        this.wheelchair_accessible = wheelchairAccessible;
     }
 
-/*    public Trip(int routeId, int serviceId, String headSign, int directionId, String blockId, String wheelchairAccessible) {
-        this.routeId = routeId;
-        this.serviceId = serviceId;
-        this.headSign = headSign;
-        this.directionId = directionId;
-        this.blockId = blockId;
-        this.wheelchairAccessible = wheelchairAccessible;
-    }*/
 
-    public int getTripId() {
-        return tripId;
+    public int getTrip_id() {
+        return trip_id;
     }
 
-    public void setTripId(int tripId) {
-        this.tripId = tripId;
+    public void setTrip_id(int trip_id) {
+        this.trip_id = trip_id;
     }
 
-    public int getRouteId() {
-        return routeId;
+    public int getRoute_id() {
+        return route_id;
     }
 
-    public void setRouteId(int routeId) {
-        this.routeId = routeId;
+    public void setRoute_id(int route_id) {
+        this.route_id = route_id;
     }
 
-    public int getServiceId() {
-        return serviceId;
+    public int getService_id() {
+        return service_id;
     }
 
-    public void setServiceId(int serviceId) {
-        this.serviceId = serviceId;
+    public void setService_id(int service_id) {
+        this.service_id = service_id;
     }
 
-    public String getHeadSign() {
-        return headSign;
+    public String getTrip_headsign() {
+        return trip_headsign;
     }
 
-    public void setHeadSign(String headSign) {
-        this.headSign = headSign;
+    public void setTrip_headsign(String trip_headsign) {
+        this.trip_headsign = trip_headsign;
     }
 
-    public int getDirectionId() {
-        return directionId;
+    public int getDirection_id() {
+        return direction_id;
     }
 
-    public void setDirectionId(int directionId) {
-        this.directionId = directionId;
+    public void setDirection_id(int direction_id) {
+        this.direction_id = direction_id;
     }
 
-    public String getBlockId() {
-        return blockId;
+    public String getBlock_id() {
+        return block_id;
     }
 
-    public void setBlockId(String blockId) {
-        this.blockId = blockId;
+    public void setBlock_id(String block_id) {
+        this.block_id = block_id;
     }
 
-    public String getWheelchairAccessible() {
-        return wheelchairAccessible;
+    public String getWheelchair_accessible() {
+        return wheelchair_accessible;
     }
 
-    public void setWheelchairAccessible(String wheelchairAccessible) {
-        this.wheelchairAccessible = wheelchairAccessible;
+    public void setWheelchair_accessible(String wheelchair_accessible) {
+        this.wheelchair_accessible = wheelchair_accessible;
     }
 
     @Override
     public String toString() {
         return "Trip{" +
-                "tripId:" + tripId +
-                ", routeId:" + routeId +
-                ", serviceId:" + serviceId +
-                ", headSign:'" + headSign + '\'' +
-                ", directionId:" + directionId +
-                ", blockId:" + blockId +
-                ", wheelchairAccessible:'" + wheelchairAccessible + '\'' +
+                "trip_id:" + trip_id +
+                ", route_id:" + route_id +
+                ", service_id:" + service_id +
+                ", trip_headsign:'" + trip_headsign + '\'' +
+                ", direction_id:" + direction_id +
+                ", block_id:" + block_id +
+                ", wheelchair_accessible:'" + wheelchair_accessible + '\'' +
                 '}';
     }
 

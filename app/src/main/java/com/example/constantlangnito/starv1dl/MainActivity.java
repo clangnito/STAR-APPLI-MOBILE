@@ -2,6 +2,8 @@ package com.example.constantlangnito.starv1dl;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
@@ -10,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -18,18 +22,44 @@ import com.loopj.android.http.BinaryHttpResponseHandler;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.List;
 
 import android.app.ProgressDialog;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import cz.msebera.android.httpclient.Header;
+
+import static com.example.constantlangnito.starv1dl.VariablesStatic.zipFileUrl;
 
 
 import static android.os.Environment.getExternalStorageDirectory;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     public static Button buttonTelecharger;
     public static Button buttonLister;
+    public static Button button_date;
+    public static Button button_heure;
+    public static Button buttonListerArretBus;
+
+    public static EditText editText_Date;
+    public static EditText editText_Heure;
+
+    public static Spinner spinner_listeBus;
+    public static Spinner spinner_listeDirection;
+
+    public int positionBusSelect = 0;
+    public int positionDirectionSelect = 0;
+
+
+    java.util.Calendar c;
+    DatePickerDialog dpd;
+
     private ProgressDialog mProgressDialog;
 
     DatabaseManager databaseHelper;
@@ -42,18 +72,36 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
-        databaseHelper = new DatabaseManager(getApplicationContext());
-        activerPermissions(this);
 
+        setContentView(R.layout.activity_main);
+        databaseHelper = new DatabaseManager(getApplicationContext(),exportPath);
+        activerPermissions(this);
+        final Service service = new Service();
+        service.start();
         onNewIntent(getIntent());
 
         buttonTelecharger = (Button)findViewById(R.id.button_telechargement);
         buttonLister = (Button)findViewById(R.id.button_listerBus);
+        buttonListerArretBus = (Button)findViewById(R.id.button_ListerArretBus);
+
+
+        button_date = (Button)findViewById(R.id.button_date);
+        button_heure = (Button)findViewById(R.id.button_heure);
+
+        editText_Date = (EditText)findViewById(R.id.editText_date);
+        editText_Heure = (EditText)findViewById(R.id.editText_heure);
+
+        spinner_listeBus = (Spinner) findViewById(R.id.spiner_bus);
+        spinner_listeBus.setOnItemSelectedListener(this);
+
+        spinner_listeDirection = (Spinner) findViewById(R.id.spiner_direction);
+
+
         buttonTelecharger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                downloadeZipFile("http://ftp.keolis-rennes.com/opendata/tco-busmetro-horaires-gtfs-versions-td/attachments/GTFS_2018.3.0.2_2018-11-26_2018-12-23.zip");
+                service.getVersionsInfos();
+                downloadeZipFile(zipFileUrl);
             }
         });
 
@@ -64,8 +112,139 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, ListerBusMetro.class));
             }
         });
+
+        buttonListerArretBus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Cursor list = databaseHelper.getArretBusForBusDatabase();
+                Intent intent = new Intent(MainActivity.this, fragment3.class);
+                Bundle vals = new Bundle();
+                vals.putString("dateDepart","0004");
+                vals.putString("heureDepart","1");
+                vals.putInt("positionBusSelect",positionBusSelect);
+                vals.putInt("positionDirectionSelect", positionDirectionSelect);
+                intent.putExtras(vals);
+                startActivity(intent);
+
+
+
+            }
+        });
+
+        button_date.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                c = java.util.Calendar.getInstance();
+
+                int day = c.get(java.util.Calendar.DAY_OF_MONTH);
+                int month = c.get(java.util.Calendar.MONTH);
+                int year = c.get(java.util.Calendar.YEAR);
+
+                dpd = new DatePickerDialog(MainActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int myear, int mmonth, int mdayOfMonth) {
+                        editText_Date.setText(mdayOfMonth +"/" + mmonth+1 +"/" + myear );
+                    }
+                },day, month, year);
+                dpd.show();
+            }
+        });
+
+
+        button_heure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                c = java.util.Calendar.getInstance();
+
+                final int heure = c.get(Calendar.HOUR_OF_DAY);
+                int minute = c.get(Calendar.MINUTE);
+
+                TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int mhourOfDay, int mminute) {
+                        editText_Heure.setText(mhourOfDay + ":" + mminute);
+                    }
+                },heure,minute,false);
+                timePickerDialog.show();
+            }
+        });
+
+
+        loadSpinnerData();
+
+
+        spinner_listeDirection.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                positionDirectionSelect = position;
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+                // sometimes you need nothing here
+            }
+        });
+
+
     }
 
+
+
+
+    private void loadSpinnerData() {
+        // database handler
+        DatabaseManager db = new DatabaseManager(getApplicationContext(),"");
+
+        // Spinner Drop down elements
+        List<String> listeBus = db.getAllNameListeBus();
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_spinner_item, listeBus);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner_listeBus.setAdapter(dataAdapter);
+    }
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position,
+                               long id) {
+        // On selecting a spinner item
+
+
+        DatabaseManager db = new DatabaseManager(getApplicationContext(),"");
+
+        // Spinner Drop down elements
+        List<String> listeDirection = db.getDirectionBus(position);
+
+        positionBusSelect = position;
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
+                android.R.layout.simple_spinner_item, listeDirection);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner_listeDirection.setAdapter(dataAdapter);
+
+    }
+
+
+
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
 
 
     public void downloadeZipFile(String zipFileUrl) {
@@ -84,7 +263,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-                Log.e("STARX", "success start");
 
                 try {
                     //Splitting a File Name from SourceFileName
@@ -98,23 +276,18 @@ public class MainActivity extends AppCompatActivity {
                         file.mkdir();
                     }
 
-                   // DatabaseManager.INIT_FOLDER_PATH = INIT_FOLDER_PATH + DestinationName.substring(0, DestinationName.lastIndexOf(".")) + "/";
-                    //Saving a File into Download Folder
 
 
                     File _f = new File(file, DestinationName);
 
                     FileOutputStream output = new FileOutputStream(_f);
 
-                    Log.e("STARX", "success try");
                     output.write(binaryData);
                     output.close();
-                    Log.e("STARX", "" + _f);
 
                     // Debut du deziping
                     exportPath = _f.getAbsolutePath();
                     exportPath = exportPath.replace(".zip", "");
-                    Log.e("STARX", "==> " + exportPath);
 
                     //DatabaseManager.DOWNLOAD_PATH = exportPath;
                     exportPath = exportPath + "/";
@@ -126,13 +299,24 @@ public class MainActivity extends AppCompatActivity {
                     /**
                      * Inserer les données télechargées
                      */
-                    DatabaseManager databaseHelper = new DatabaseManager(getApplicationContext());
+                    DatabaseManager databaseHelper = new DatabaseManager(getApplicationContext(),exportPath);
                     databaseHelper.insertAll();
                     dismissDialog(DIALOG_DOWNLOAD_PROGRESS);
                     mProgressDialog.dismiss();
                     buttonTelecharger.setText("fin de telechargement");
+                    new CountDownTimer(5000, 1000) {
+
+                        public void onTick(long millisUntilFinished) {
+                            buttonTelecharger.setText("fin de telechargement");
+                            Log.e("STAR-timer", "");
+
+                        }
+
+                        public void onFinish() {
+                            onNewIntent(getIntent());
+                        }
+                    }.start();
                 } catch (IOException e) {
-                    Log.e("STARX", "success catch");
                     e.printStackTrace();
                 }
             }
@@ -142,7 +326,6 @@ public class MainActivity extends AppCompatActivity {
             public void onProgress(long bytesWritten, long totalSize) {
                 super.onProgress(bytesWritten, totalSize);
                 int val = (int) ((bytesWritten * 100) / totalSize);
-                Log.d("STARX", "downloading ..... " + val);
                 mProgressDialog.setProgress(val);
                 mProgressDialog.getCurrentFocus();
             }
@@ -150,13 +333,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
 
-                Log.e("STARX", "==> " + error);
 
             }
 
 
         });
     }
+
+    //
+
 
     // Storage Permissions variables
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -217,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
             case DIALOG_DOWNLOAD_PROGRESS: //we set this to 0
                 mProgressDialog = new ProgressDialog(this);
-                mProgressDialog.setMessage("Downloading file…");
+                mProgressDialog.setMessage("Telechargement …");
                 mProgressDialog.setIndeterminate(false);
                 mProgressDialog.setMax(100);
                 mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);

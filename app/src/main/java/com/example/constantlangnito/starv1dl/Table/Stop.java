@@ -6,20 +6,23 @@ package com.example.constantlangnito.starv1dl.Table;
 
 public class Stop {
 
+    
     private String stop_id;
     private String name;
     private String description;
     private float latitude;
     private float longitude;
     private String wheelChairBoalding;
+    private String ordre;
 
-    public Stop(String stop_id, String name, String description, float latitude, float longitude, String wheelChairBoalding) {
+    public Stop(String stop_id, String name, String description, float latitude, float longitude, String wheelChairBoalding, String ordre) {
         this.stop_id = stop_id;
         this.name = name;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
         this.wheelChairBoalding = wheelChairBoalding;
+        this.ordre = ordre;
     }
 
 
@@ -80,6 +83,7 @@ public class Stop {
                 ", latitude:" + latitude +
                 ", longitude:" + longitude +
                 ", wheelChairBoalding:'" + wheelChairBoalding + '\'' +
+                ", order:'" + ordre + '\'' +
                 '}';
     }
 

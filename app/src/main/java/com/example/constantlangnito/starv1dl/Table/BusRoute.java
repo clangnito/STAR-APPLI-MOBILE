@@ -7,19 +7,20 @@ package com.example.constantlangnito.starv1dl.Table;
 public class BusRoute {
 
 
+//route_id,agency_id,route_short_name,route_long_name,route_desc,route_type,route_url,route_color,route_text_color,route_sort_order
     private String route_id;
-    private String shortName;
-    private String longName;
-    private String description;
+    private String route_short_name;
+    private String route_long_name;
+    private String route_desc;
     private String type;
     private String color;
     private String textColor;
 
-    public BusRoute(String route_id, String shortName, String longName, String description, String type, String color, String textColor) {
+    public BusRoute(String route_id, String route_short_name, String route_long_name, String route_desc, String type, String color, String textColor) {
         this.route_id = route_id;
-        this.shortName = shortName;
-        this.longName = longName;
-        this.description = description;
+        this.route_short_name = route_short_name;
+        this.route_long_name = route_long_name;
+        this.route_desc = route_desc;
         this.type = type;
         this.color = color;
         this.textColor = textColor;
@@ -27,11 +28,11 @@ public class BusRoute {
 
 
     public String getshortName() {
-        return shortName;
+        return route_short_name;
     }
 
     public void setshortName(String shortName) {
-        this.shortName = shortName;
+        this.route_short_name = shortName;
     }
 
     public String getRoute_id() {
@@ -42,20 +43,20 @@ public class BusRoute {
         this.route_id = route_id;
     }
 
-    public String getLongName() {
-        return longName;
+    public String getRoute_long_name() {
+        return route_long_name;
     }
 
-    public void setLongName(String longName) {
-        this.longName = longName;
+    public void setRoute_long_name(String route_long_name) {
+        this.route_long_name = route_long_name;
     }
 
-    public String getDescription() {
-        return description;
+    public String getRoute_desc() {
+        return route_desc;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setRoute_desc(String route_desc) {
+        this.route_desc = route_desc;
     }
 
     public String getType() {
@@ -86,9 +87,9 @@ public class BusRoute {
     public String toString() {
         return "BusRoute{" +
                 "route_id:'" + route_id + '\'' +
-                ", shortName:'" + shortName + '\'' +
-                ", longName:'" + longName + '\'' +
-                ", description:'" + description + '\'' +
+                ", route_short_name:'" + route_short_name + '\'' +
+                ", route_long_name:'" + route_long_name + '\'' +
+                ", route_desc:'" + route_desc + '\'' +
                 ", type:'" + type + '\'' +
                 ", color:'" + color + '\'' +
                 ", textColor:'" + textColor + '\'' +

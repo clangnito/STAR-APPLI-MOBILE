@@ -23,6 +23,73 @@
         tools:layout_editor_absoluteX="57dp"
         tools:layout_editor_absoluteY="216dp" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editText_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="date" />
+
+        <Button
+            android:id="@+id/button_date"
+            android:layout_width="155dp"
+            android:layout_height="wrap_content"
+            android:text="Date" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/editText_heure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="time" />
+
+        <Button
+            android:id="@+id/button_heure"
+            android:layout_width="153dp"
+            android:layout_height="wrap_content"
+            android:text="Heure" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Spinner
+            android:id="@+id/spiner_bus"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"></Spinner>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Spinner
+            android:id="@+id/spiner_direction"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"></Spinner>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/button_ListerArretBus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Continuer" />
+    </LinearLayout>
 
 
 

@@ -33,7 +33,7 @@ public class ListerBusMetro extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lister_bus_metro);
 
-        db = new DatabaseManager(this);
+        db = new DatabaseManager(this,"");
 
         ArrayList list = db.getBusRoutesFromDatabase();
 

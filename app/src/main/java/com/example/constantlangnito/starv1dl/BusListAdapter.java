@@ -3,14 +3,12 @@ package com.example.constantlangnito.starv1dl;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
 
@@ -53,14 +51,13 @@ public class BusListAdapter extends RecyclerView.Adapter<BusListAdapter.BusListV
         busDirections.clear();
         if(!mId.contains(busRoute.getshortName())){
             mId.add(busRoute.getshortName());
-            busDirections.addAll(getDirections(busRoute.getLongName()));
+            busDirections.addAll(getDirections(busRoute.getRoute_long_name()));
             busDirections.notifyDataSetChanged();
         }else{
             mId.remove(busRoute.getshortName());
             busDirections.clear();
             busDirections.notifyDataSetChanged();
         }
-        //busListViewHolder.direction2.setText((routes.get(i).getLongName().split("<>").length>1)?"<<"+routes.get(i).getLongName().split("<>")[1] : "");
     }
 
 

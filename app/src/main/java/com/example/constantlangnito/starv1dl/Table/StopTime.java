@@ -6,72 +6,73 @@ package com.example.constantlangnito.starv1dl.Table;
 
 public class StopTime {
 
-    private int tripId;
-    private String arrivalTime;
-    private String departureTme;
-    private int stopId;
-    private String StopSequence;
+    //trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,pickup_type,drop_off_type,shape_dist_traveled
+    private int trip_id;
+    private String arrival_time;
+    private String departure_time;
+    private int stop_id;
+    private String stop_sequence;
 
-    public StopTime(int tripId, String arrivalTime, String departureTme, int stopId, String stopSequence) {
-        this.tripId = tripId;
-        this.arrivalTime = arrivalTime;
-        this.departureTme = departureTme;
-        this.stopId = stopId;
-        StopSequence = stopSequence;
+    public StopTime(int trip_id, String arrival_time, String departure_time, int stop_id, String stopsequence) {
+        this.trip_id = trip_id;
+        this.arrival_time = arrival_time;
+        this.departure_time = departure_time;
+        this.stop_id = stop_id;
+        stop_sequence = stopsequence;
     }
 
-    public int getTripId() {
-        return tripId;
+    public int getTrip_id() {
+        return trip_id;
     }
 
-    public void setTripId(int tripId) {
-        this.tripId = tripId;
+    public void setTrip_id(int trip_id) {
+        this.trip_id = trip_id;
     }
 
-    public String getArrivalTime() {
-        return arrivalTime;
+    public String getArrival_time() {
+        return arrival_time;
     }
 
-    public void setArrivalTime(String arrivalTime) {
-        this.arrivalTime = arrivalTime;
+    public void setArrival_time(String arrival_time) {
+        this.arrival_time = arrival_time;
     }
 
-    public String getDepartureTme() {
-        return departureTme;
+    public String getDeparture_time() {
+        return departure_time;
     }
 
-    public void setDepartureTme(String departureTme) {
-        this.departureTme = departureTme;
+    public void setDeparture_time(String departure_time) {
+        this.departure_time = departure_time;
     }
 
-    public int getStopId() {
-        return stopId;
+    public int getStop_id() {
+        return stop_id;
     }
 
-    public void setStopId(int stopId) {
-        this.stopId = stopId;
+    public void setStop_id(int stop_id) {
+        this.stop_id = stop_id;
     }
 
-    public String getStopSequence() {
-        return StopSequence;
+    public String getStop_sequence() {
+        return stop_sequence;
     }
 
-    public void setStopSequence(String stopSequence) {
-        StopSequence = stopSequence;
+    public void setStop_sequence(String stop_sequence) {
+        this.stop_sequence = stop_sequence;
     }
 
     @Override
     public String toString() {
         return "StopTime{" +
-                "tripId:" + tripId +
-                ", arrivalTime:'" + arrivalTime + '\'' +
-                ", departureTme:'" + departureTme + '\'' +
-                ", stopId:" + stopId +
-                ", StopSequence:'" + StopSequence + '\'' +
+                "trip_id:" + trip_id +
+                ", arrival_time:'" + arrival_time + '\'' +
+                ", departure_time:'" + departure_time + '\'' +
+                ", stop_id:" + stop_id +
+                ", stop_sequence:'" + stop_sequence + '\'' +
                 '}';
     }
 
     public String sql() {
-        return "("+tripId+",'"+arrivalTime+"','"+departureTme+"',"+stopId+",'"+StopSequence+"')";
+        return "("+ trip_id +",'"+ arrival_time +"','"+ departure_time +"',"+ stop_id +",'"+ stop_sequence +"')";
     }
 }

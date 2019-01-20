@@ -1,32 +1,30 @@
 package com.example.constantlangnito.starv1dl;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
 import com.example.constantlangnito.starv1dl.Table.Stop;
 import com.example.constantlangnito.starv1dl.Table.StopTime;
 import com.example.constantlangnito.starv1dl.Table.Trip;
-import com.example.constantlangnito.starv1dl.Table.Calendar;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static android.os.Environment.getExternalStorageDirectory;
-import static com.example.constantlangnito.starv1dl.VariablesStatic.CALENDAR_CSV_FILE;
-import static com.example.constantlangnito.starv1dl.VariablesStatic.DOWNLOAD_PATH;
+//import static com.example.constantlangnito.starv1dl.VariablesStatic.DOWNLOAD_PATH;
 import static com.example.constantlangnito.starv1dl.VariablesStatic.INIT_FOLDER_PATH;
 import static com.example.constantlangnito.starv1dl.VariablesStatic.STOPS_CSV_FILE;
-import static com.example.constantlangnito.starv1dl.VariablesStatic.STOP_TIMES_CSV_FILE;
 import static com.example.constantlangnito.starv1dl.VariablesStatic.TRIPS_CSV_FILE;
 
 
@@ -40,13 +38,16 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
     public SQLiteDatabase database;
     private static String DB_NAME = "starBusDb";
     private static final int DATA_BASE_VERSION = 1;
+    private static String DOWNLOAD_PATH = "";
+    String splitor = "<>";
+
     /**
      */
 
 
-    public DatabaseManager(Context context) {
+    public DatabaseManager(Context context, String sDOWNLOAD_PATH) {
         super(context, DB_NAME, null, DATA_BASE_VERSION);
-        Log.d("DB CREATE", "Creation de la base de donnees");
+        DOWNLOAD_PATH = sDOWNLOAD_PATH;
     }
 
     @Override
@@ -79,12 +80,58 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
         return result;
     }
 
+
+    public List<String> getAllNameListeBus(){
+        List<String> listeBus = new ArrayList<String>();
+
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + BusRoutes.CONTENT_PATH;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                listeBus.add(cursor.getString(2));
+            } while (cursor.moveToNext());
+        }
+
+        // closing connection
+        cursor.close();
+        db.close();
+
+        // returning lables
+        return listeBus;
+    }
+
+    public List<String> getDirectionBus(int position){
+
+
+        ArrayList<BusRoute> listeBusDataBase = getBusRoutesFromDatabase();
+
+        BusRoute busRoute = listeBusDataBase.get(position);
+
+        List<String> listeDirection = new ArrayList<String>();
+
+        listeDirection = getDirections(busRoute.getRoute_long_name());
+
+       return  listeDirection;
+    }
+
+    public ArrayList<String> getDirections(@NonNull String allDirections) {
+        String[] directions = allDirections.split(splitor);
+        ArrayList<String> directionsList = new ArrayList<>();
+        directionsList.addAll(Arrays.asList(directions));
+        return directionsList;
+    }
+
     /**
      * Insert des données dans les tables
      */
     public void insertAll() {
-        //insertStopTimes();
-        //insertCalendars();
+        insertStopTimes();
+        insertCalendars();
         insertBusRoutes();
         insertStops();
         insertTrips();
@@ -94,251 +141,143 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
 
 
     public void insertStopTimes() {
+
+        Log.d("insertStopTimes", "debut ");
         database = this.getWritableDatabase();
-        ArrayList<StopTime> stopTimes = new ArrayList<StopTime>();
-        try {
-            stopTimes = loadStopTimesData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            database.beginTransaction();
-            String sql = "INSERT INTO " + StopTimes.CONTENT_PATH + " (" +
-                    StopTimes.StopTimeColumns.TRIP_ID + "," +
-                    StopTimes.StopTimeColumns.ARRIVAL_TIME + "," +
-                    StopTimes.StopTimeColumns.DEPARTURE_TIME + "," +
-                    StopTimes.StopTimeColumns.STOP_ID + "," +
-                    StopTimes.StopTimeColumns.STOP_SEQUENCE +
-                    ") VALUES (?,?,?,?,?)";
-            SQLiteStatement insert = database.compileStatement(sql);
-            for (int i = 0; i < stopTimes.size(); i++) {
-                StopTime item = stopTimes.get(i);
-                insert.bindLong(1, item.getTripId());
-                insert.bindString(2, item.getArrivalTime());
-                insert.bindString(3, item.getDepartureTme());
-                insert.bindLong(4, item.getStopId());
-                insert.bindString(5, item.getStopSequence());
-                Log.d("STARX", i + " -- stoptime added");
-                insert.execute();
-            }
-            database.setTransactionSuccessful();
-            Log.d("STARX", stopTimes.size() + " stoptimes added ----------------------------------------");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
-        }
-    }
 
-
-    public void insertTrips() {
-        ArrayList<Trip> items = new ArrayList<Trip>();
-        try {
-            items = loadTripsData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            database = this.getWritableDatabase();
-            database.beginTransaction();
-            String sql = "INSERT INTO " + StarContract.Trips.CONTENT_PATH + " (" +
-                    Trips.TripColumns.ROUTE_ID+ "," +
-                    Trips.TripColumns.SERVICE_ID+ "," +
-                    Trips.TripColumns.HEADSIGN+ "," +
-                    Trips.TripColumns.DIRECTION_ID+ "," +
-                    Trips.TripColumns.BLOCK_ID+ "," +
-                    Trips.TripColumns.WHEELCHAIR_ACCESSIBLE+
-                    ") VALUES (?,?,?,?,?,?,?)";
-            SQLiteStatement insert = database.compileStatement(sql);
-            for (int i = 0; i < items.size(); i++) {
-                Trip item = items.get(i);
-                insert.bindLong(1, item.getTripId());
-                insert.bindLong(2, item.getRouteId());
-                insert.bindLong(3, item.getServiceId());
-                insert.bindString(4, item.getHeadSign());
-                insert.bindLong(5, item.getDirectionId());
-                insert.bindString(6, item.getBlockId());
-                insert.bindString(7, item.getWheelchairAccessible());
-                Log.d("STARX", i + " -- Trips added");
-                insert.execute();
-            }
-            database.setTransactionSuccessful();
-            Log.d("STARX", items.size() + " Calendar added ----------------------------------------");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
-        }
-    }
-
-    /**
-     * Loads Trip from the csv file
-     *
-     * @return
-     * @throws IOException
-     */
-    public static ArrayList<Trip> loadTripsData() throws IOException {
-        Log.d("STARXC", "start loading... " + DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH + DOWNLOAD_PATH + "/" + TRIPS_CSV_FILE);
-        ArrayList<Trip> trips = new ArrayList<>();
-        FileReader file = new FileReader(new File(DEVICE_ROOT_FOLDER, INIT_FOLDER_PATH + TRIPS_CSV_FILE));
-        BufferedReader buffer = new BufferedReader(file);
-        String line = "";
-        int i = 0;
-        while ((line = buffer.readLine()) != null) {
-            if (i != 0) {
-                String[] str = line.split(",");
-                int routeId = Integer.valueOf(str[0].replaceAll("\"", ""));
-                int tripId = Integer.valueOf(str[2].replaceAll("\"", ""));
-                int serviceId = Integer.valueOf(str[1].replaceAll("\"", ""));
-                int direction = Integer.valueOf(str[5].replaceAll("\"", ""));
-                String block = str[6].replaceAll("\"", "");
-                Trip trip = new Trip(tripId,
-                        routeId,
-                        serviceId,
-                        str[3].replaceAll("\"", ""),
-                        direction,
-                        block,
-                        str[8].replaceAll("\"", ""));
-                trips.add(trip);
-                Log.d("STARXT", i + "-loaded... " + trip.toString());
-            }
-            i++;
-        }
-        buffer.close();
-        file.close();
-        Log.d("STARXT", i + " trips loaded");
-        return trips;
-    }
-
-
-    /**
-     * Loads StopTimes from the csv file
-     *
-     * @return
-     * @throws IOException
-     */
-    public ArrayList<StopTime> loadStopTimesData() throws IOException {
-        Log.d("STARXC", "start loading... " + DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH + STOP_TIMES_CSV_FILE);
-        ArrayList<StopTime> fileStopTimes = new ArrayList<>();
-        long items = 0;
-        long allStoptimes = 0;
-        String currfile = INIT_FOLDER_PATH + STOP_TIMES_CSV_FILE;
-        Log.d("STARX", "current file ..: " + currfile);
-        FileReader file = new FileReader(new File(DEVICE_ROOT_FOLDER, currfile));
-        BufferedReader buffer = new BufferedReader(file);
-        String line = "";
-        long nb = 0;
-        while ((line = buffer.readLine()) != null) {
-            if (nb != 0) {
-                String[] str = line.split(",");
-                int tripId = Integer.valueOf(str[0].replaceAll("\"", ""));
-                int stopId = Integer.valueOf(str[3].replaceAll("\"", ""));
-                StopTime stopTime = new StopTime(
-                        tripId, str[1].replaceAll("\"", ""),
-                        str[2].replaceAll("\"", ""),
-                        stopId,
-                        str[4].replaceAll("\"", ""));
-                fileStopTimes.add(stopTime);
-                Log.d("STARXST", items + "-loaded... " + stopTime.toString());
-            }
-            items++;
-            nb++;
-        }
-        buffer.close();
-        file.close();
-        allStoptimes += items;
-        Log.d("STARXST", items + " stopTimes loaded");
-        return fileStopTimes;
-    }
-
-
-
-
-
-
-
-    public void insertBusRoutes() {
-        ArrayList<BusRoute> items = new ArrayList<BusRoute>();
-        database = this.getWritableDatabase();
-        try {
-            items = loadBusRoutesData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         try {
 
-            String sqlDelete = "DELETE FROM " + StarContract.BusRoutes.CONTENT_PATH;
+            String sqlDelete = "DELETE FROM " + StarContract.StopTimes.CONTENT_PATH;
             SQLiteStatement delete = database.compileStatement(sqlDelete);
             delete.execute();
-            Log.d("STAR DELETE FROM", " Bus Route ");
 
+            BufferedReader stopTimesBuffered = loadStopTimesData();
+            stopTimesBuffered.readLine();
+            int i = 0;
+            StringBuilder sql = new StringBuilder();
+            String line;
+            String[] splits;
             database.beginTransaction();
-            String sql = "INSERT INTO " + StarContract.BusRoutes.CONTENT_PATH + " (route_id," +
-                    BusRoutes.BusRouteColumns.SHORT_NAME + "," +
-                    BusRoutes.BusRouteColumns.LONG_NAME + "," +
-                    BusRoutes.BusRouteColumns.DESCRIPTION + "," +
-                    BusRoutes.BusRouteColumns.TYPE + "," +
-                    BusRoutes.BusRouteColumns.COLOR + "," +
-                    BusRoutes.BusRouteColumns.TEXT_COLOR +
-                    ") VALUES (?,?,?,?,?,?,?)";
-            SQLiteStatement insert = database.compileStatement(sql);
-            for (int i = 0; i < items.size(); i++) {
-                BusRoute item = items.get(i);
-                insert.bindString(1, item.getRoute_id());
-                insert.bindString(2, item.getshortName());
-                insert.bindString(3, item.getLongName());
-                insert.bindString(4, item.getDescription());
-                insert.bindString(5, item.getType());
-                insert.bindString(6, item.getColor());
-                insert.bindString(7, item.getTextColor());
-                insert.execute();
+            try {
+                while ((line = stopTimesBuffered.readLine()) != null) {
+                    if (i == 20000) {
+                        database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES %s",
+                                StopTimes.CONTENT_PATH, StopTimes.StopTimeColumns.TRIP_ID,
+                                StopTimes.StopTimeColumns.ARRIVAL_TIME, StopTimes.StopTimeColumns.DEPARTURE_TIME,
+                                StopTimes.StopTimeColumns.STOP_ID, StopTimes.StopTimeColumns.STOP_SEQUENCE,
+                                sql.toString())
+                        );
+                        Log.e("ATG", "il y a eu une insertion");
+                        i = 0;
+                        sql = new StringBuilder();
+                    }
+
+                    if (i != 0) sql.append(", ");
+
+                    splits = line.split(",");
+                    sql.append(String.format("(%s, %s, %s, %s, %s)",
+                            splits[0], splits[1], splits[2], splits[3], splits[4]));
+                    ++i;
+                }
+
+                if (i > 0) {
+                    database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES %s",
+                            StopTimes.CONTENT_PATH, StopTimes.StopTimeColumns.TRIP_ID,
+                            StopTimes.StopTimeColumns.ARRIVAL_TIME, StopTimes.StopTimeColumns.DEPARTURE_TIME,
+                            StopTimes.StopTimeColumns.STOP_ID, StopTimes.StopTimeColumns.STOP_SEQUENCE,
+                            sql.toString()));
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
             }
-            database.setTransactionSuccessful();
-            Log.d("STAR", " Bus Route add ");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
+        } catch (IOException ignored) {
         }
     }
 
 
-    public void insertStops() {
-        ArrayList<Stop> items = new ArrayList<Stop>();
+    public void insertCalendars() {
+
+        Log.d("insertCalendars", "debut ");
+        database = this.getWritableDatabase();
+
         try {
-            items = loadStopsData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            database = this.getWritableDatabase();
+
+            String sqlDelete = "DELETE FROM " + StarContract.Calendar.CONTENT_PATH;
+            SQLiteStatement delete = database.compileStatement(sqlDelete);
+            delete.execute();
+
+            BufferedReader calendarBuffered = loadCalendarData();
+            calendarBuffered.readLine();
+            int i = 0;
+            StringBuilder sql = new StringBuilder();
+            String line;
+            String[] splits;
             database.beginTransaction();
-            String sql = "INSERT INTO " + StarContract.Stops.CONTENT_PATH + " (" +
-                    Stops.StopColumns.NAME + "," +
-                    Stops.StopColumns.DESCRIPTION + "," +
-                    Stops.StopColumns.LATITUDE + "," +
-                    Stops.StopColumns.LONGITUDE + "," +
-                    Stops.StopColumns.WHEELCHAIR_BOARDING +
-                    ") VALUES (?,?,?,?,?,?)";
-            SQLiteStatement insert = database.compileStatement(sql);
-            for (int i = 0; i < items.size(); i++) {
-                Stop item = items.get(i);
-                insert.bindString(1, item.getId());
-                insert.bindString(2, item.getName());
-                insert.bindString(3, item.getDescription());
-                insert.bindLong(4, (long) item.getLatitude());
-                insert.bindLong(5, (long) item.getLongitude());
-                insert.bindString(6, item.getWheelChairBoalding());
-                Log.d("STARX", i + " -- Stops added");
-                insert.execute();
+            try {
+                while ((line = calendarBuffered.readLine()) != null) {
+                    if (i == 50) {
+                        database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES %s",
+                                Calendar.CONTENT_PATH, Calendar.CalendarColumns.SERVICE_ID, Calendar.CalendarColumns.MONDAY, Calendar.CalendarColumns.TUESDAY,
+                                Calendar.CalendarColumns.WEDNESDAY, Calendar.CalendarColumns.THURSDAY,Calendar.CalendarColumns.FRIDAY,
+                                Calendar.CalendarColumns.SATURDAY, Calendar.CalendarColumns.SUNDAY,Calendar.CalendarColumns.START_DATE,
+                                Calendar.CalendarColumns.END_DATE, sql.toString()));
+
+                        Log.e("ATG", "il y a eu une insertion Calendars");
+                        i = 0;
+                        sql = new StringBuilder();
+                    }
+
+                    if (i != 0) sql.append(", ");
+
+                    splits = line.split(",");
+                    sql.append(String.format("(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                            splits[0], splits[1], splits[2], splits[3], splits[4], splits[5], splits[6], splits[7], splits[8], splits[9]));
+                    ++i;
+
+
+                }
+
+                if (i > 0) {
+                    database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) VALUES %s",
+                            Calendar.CONTENT_PATH, Calendar.CalendarColumns.SERVICE_ID, Calendar.CalendarColumns.MONDAY, Calendar.CalendarColumns.TUESDAY,
+                            Calendar.CalendarColumns.WEDNESDAY, Calendar.CalendarColumns.THURSDAY,Calendar.CalendarColumns.FRIDAY,
+                            Calendar.CalendarColumns.SATURDAY, Calendar.CalendarColumns.SUNDAY,Calendar.CalendarColumns.START_DATE,
+                            Calendar.CalendarColumns.END_DATE, sql.toString()));
+                    Log.e("ATG", "fin insertion Calendars");
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
             }
-            database.setTransactionSuccessful();
-            Log.d("STARX", items.size() + " Stops added ----------------------------------------");
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            database.endTransaction();
+        } catch (IOException ignored) {
         }
+    }
+
+
+
+    /**
+     * Loads Stops from the csv file
+     *
+     * @return
+     * @throws IOException
+     */
+    public static BufferedReader loadTripsData() throws IOException {
+        FileReader file = new FileReader(new File( DOWNLOAD_PATH + "/" + VariablesStatic.TRIPS_CSV_FILE));
+        return new BufferedReader(file);
+    }
+
+
+
+    /**
+     * Loads Stops from the csv file
+     *
+     * @return
+     * @throws IOException
+     */
+    public static BufferedReader loadStopTimesData() throws IOException {
+        FileReader file = new FileReader(new File( DOWNLOAD_PATH + "/" + VariablesStatic.STOP_TIMES_CSV_FILE));
+        return new BufferedReader(file);
     }
 
     /**
@@ -347,73 +286,247 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
      * @return
      * @throws IOException
      */
-    public static ArrayList<Stop> loadStopsData() throws IOException {
-        Log.d("STARXC", "start loading... " + DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH + DOWNLOAD_PATH + "/" + STOPS_CSV_FILE);
-        ArrayList<Stop> stops = new ArrayList<>();
-        FileReader file = new FileReader(new File(DEVICE_ROOT_FOLDER, INIT_FOLDER_PATH+ STOPS_CSV_FILE));
-        Log.e("STARXS", " Absolut Path for file" + file.toString());
-        BufferedReader buffer = new BufferedReader(file);
-        String line = "";
-        int i = 0;
-        while ((line = buffer.readLine()) != null) {
-            if (i != 0) {
-                String[] str = line.split(",");
-                String id = str[0].replaceAll("\"", "");
-                String name = str[2].replaceAll("\"", "");
-                String description = str[3].replaceAll("\"", "");
-                float latitude = Float.valueOf(str[4].replace('"', ' '));
-                float longitude = Float.valueOf(str[5].replace('"', ' '));
-                String wheelChairBoalding = str[11].replaceAll("\"", "");
-                Stop stop = new Stop(id, name, description, latitude, longitude, wheelChairBoalding);
-                stops.add(stop);
-                Log.d("STARXS", i + "-loaded... " + stop.toString());
-            }
-            i++;
-        }
-        buffer.close();
-        file.close();
-        Log.d("STARXS", i + " stops loaded");
-        return stops;
+    public static BufferedReader loadCalendarData() throws IOException {
+        FileReader file = new FileReader(new File( DOWNLOAD_PATH + "/" + VariablesStatic.CALENDAR_CSV_FILE));
+        return new BufferedReader(file);
     }
 
-
     /**
+     * Loads Stops from the csv file
      *
      * @return
      * @throws IOException
      */
-    public static ArrayList<BusRoute> loadBusRoutesData() throws IOException {
-        Log.d("STARXC", "start loading... " + DEVICE_ROOT_FOLDER + "/" + INIT_FOLDER_PATH  + DOWNLOAD_PATH + "/" + VariablesStatic.BUS_ROUTES_CSV_FILE);
-        ArrayList<BusRoute> busRoutes = new ArrayList<>();
-        FileReader file = new FileReader(new File(DEVICE_ROOT_FOLDER, INIT_FOLDER_PATH + DOWNLOAD_PATH + "/" + VariablesStatic.BUS_ROUTES_CSV_FILE));
-        BufferedReader buffer = new BufferedReader(file);
-        String line = "";
-        int i = 0;
-        while ((line = buffer.readLine()) != null) {
-            if (i != 0) {
-                String[] str = line.split(",");
-                BusRoute br = new BusRoute(
-                        str[0].replaceAll("\"", ""),
-                        str[2].replaceAll("\"", ""),
-                        str[3].replaceAll("\"", ""),
-                        str[4].replaceAll("\"", ""),
-                        str[5].replaceAll("\"", ""),
-                        str[7].replaceAll("\"", ""),
-                        str[8].replaceAll("\"", ""));
-                busRoutes.add(br);
-                Log.d("STARXBR", i + "-loaded... " + br.toString());
-            }
-            i++;
-        }
-        buffer.close();
-        file.close();
-        Log.d("STARXBR", i + " busRoutes loaded");
-        return busRoutes;
+    public static BufferedReader loadBusRoutesData() throws IOException {
+        FileReader file = new FileReader(new File(  DOWNLOAD_PATH + "/" + VariablesStatic.BUS_ROUTES_CSV_FILE));
+        return new BufferedReader(file);
     }
 
 
     /**
+     * Loads Stops from the csv file
      *
+     * @return
+     * @throws IOException
+     */
+    public static BufferedReader loadStopsData() throws IOException {
+        FileReader file = new FileReader(new File( DOWNLOAD_PATH + "/" + VariablesStatic.STOPS_CSV_FILE));
+        return new BufferedReader(file);
+    }
+
+
+    public void insertBusRoutes() {
+
+        Log.d("insertBusRoutes", "debut ");
+        database = this.getWritableDatabase();
+
+        try {
+
+            String sqlDelete = "DELETE FROM " + StarContract.BusRoutes.CONTENT_PATH;
+            SQLiteStatement delete = database.compileStatement(sqlDelete);
+            delete.execute();
+
+            BufferedReader BusRoutesBuffered = loadBusRoutesData();
+            BusRoutesBuffered.readLine();
+            int i = 0;
+            StringBuilder sql = new StringBuilder();
+            String line;
+            String[] splits;
+            database.beginTransaction();
+            try {
+                while ((line = BusRoutesBuffered.readLine()) != null) {
+                    if (i == 50) {
+                        database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES %s",
+                                BusRoutes.CONTENT_PATH, "route_id", BusRoutes.BusRouteColumns.SHORT_NAME
+                                , BusRoutes.BusRouteColumns.LONG_NAME, BusRoutes.BusRouteColumns.DESCRIPTION
+                                , BusRoutes.BusRouteColumns.TYPE, BusRoutes.BusRouteColumns.COLOR,
+                                BusRoutes.BusRouteColumns.TEXT_COLOR, sql.toString()));
+
+                        Log.e("ATG", "il y a eu une insertion BusRoutes");
+                        i = 0;
+                        sql = new StringBuilder();
+                    }
+
+                    if (i != 0) sql.append(", ");
+
+                    splits = line.split(",");
+                    sql.append(String.format("(%s, %s, %s, %s, %s, %s, %s)",
+                            splits[0], splits[2], splits[3], splits[4], splits[5], splits[7], splits[8]));
+                    ++i;
+
+                }
+
+                if (i > 0) {
+                    database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES %s",
+                            BusRoutes.CONTENT_PATH, "route_id", BusRoutes.BusRouteColumns.SHORT_NAME
+                            , BusRoutes.BusRouteColumns.LONG_NAME, BusRoutes.BusRouteColumns.DESCRIPTION
+                            , BusRoutes.BusRouteColumns.TYPE, BusRoutes.BusRouteColumns.COLOR,
+                            BusRoutes.BusRouteColumns.TEXT_COLOR, sql.toString()));
+                    Log.e("ATG", "fin insertion Stop");
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
+        } catch (IOException ignored) {
+        }
+    }
+
+
+
+
+    public void insertStops() {
+
+        Log.d("insertStops", "debut ");
+        database = this.getWritableDatabase();
+
+        try {
+
+            String sqlDelete = "DELETE FROM " + StarContract.Stops.CONTENT_PATH;
+            SQLiteStatement delete = database.compileStatement(sqlDelete);
+            delete.execute();
+
+            BufferedReader stopsBuffered = loadStopsData();
+            stopsBuffered.readLine();
+            int i = 0;
+            StringBuilder sql = new StringBuilder();
+            String line;
+            String[] splits;
+            database.beginTransaction();
+            try {
+                while ((line = stopsBuffered.readLine()) != null) {
+                    if (i == 500) {
+                        database.execSQL(String.format("INSERT INTO %s (%s,%s, %s, %s, %s, %s) VALUES %s",
+                                Stops.CONTENT_PATH, Stops.StopColumns.STOP_ID, Stops.StopColumns.NAME, Stops.StopColumns.DESCRIPTION,
+                                Stops.StopColumns.LATITUDE, Stops.StopColumns.LONGITUDE,
+                                Stops.StopColumns.WHEELCHAIR_BOARDING, sql.toString()));
+
+                        Log.e("ATG", "il y a eu une insertion Stop");
+                        i = 0;
+                        sql = new StringBuilder();
+                    }
+
+                    if (i != 0) sql.append(", ");
+
+                    splits = line.split(",");
+                    sql.append(String.format("(%s, %s, %s, %s, %s, %s)",
+                            splits[0],splits[2], splits[3], splits[4], splits[5], splits[11]));
+                    ++i;
+
+                }
+
+                if (i > 0) {
+                    database.execSQL(String.format("INSERT INTO %s (%s,%s, %s, %s, %s, %s) VALUES %s",
+                            Stops.CONTENT_PATH, Stops.StopColumns.STOP_ID, Stops.StopColumns.NAME, Stops.StopColumns.DESCRIPTION,
+                            Stops.StopColumns.LATITUDE, Stops.StopColumns.LONGITUDE,
+                            Stops.StopColumns.WHEELCHAIR_BOARDING, sql.toString()));
+                    Log.e("ATG", "fin insertion Stop");
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
+        } catch (IOException ignored) {
+        }
+    }
+
+
+
+    public void insertTrips() {
+
+        Log.d("insertTrips", "debut ");
+        database = this.getWritableDatabase();
+
+        try {
+
+            String sqlDelete = "DELETE FROM " + StarContract.Trips.CONTENT_PATH;
+            SQLiteStatement delete = database.compileStatement(sqlDelete);
+            delete.execute();
+
+            BufferedReader TripsBuffered = loadTripsData();
+            TripsBuffered.readLine();
+            int i = 0;
+            StringBuilder sql = new StringBuilder();
+            String line;
+            String[] splits;
+            database.beginTransaction();
+            try {
+                while ((line = TripsBuffered.readLine()) != null) {
+                    if (i == 10000) {
+                        database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES %s",
+                                Trips.CONTENT_PATH, Trips.TripColumns.TRIP_ID, Trips.TripColumns.ROUTE_ID, Trips.TripColumns.SERVICE_ID,
+                                Trips.TripColumns.HEADSIGN, Trips.TripColumns.DIRECTION_ID,Trips.TripColumns.BLOCK_ID,
+                                Trips.TripColumns.WHEELCHAIR_ACCESSIBLE, sql.toString()));
+
+                        Log.e("ATG", "il y a eu une insertion insertTrips");
+                        i = 0;
+                        sql = new StringBuilder();
+                    }
+
+                    if (i != 0) sql.append(", ");
+
+                    splits = line.split(",");
+                    sql.append(String.format("(%s, %s, %s, %s, %s, %s, %s)",
+                            splits[2],splits[0], splits[1], splits[3], splits[5], splits[6], splits[8]));
+                    ++i;
+
+
+                }
+
+                if (i > 0) {
+                    database.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s, %s, %s) VALUES %s",
+                            Trips.CONTENT_PATH, Trips.TripColumns.TRIP_ID, Trips.TripColumns.ROUTE_ID, Trips.TripColumns.SERVICE_ID,
+                            Trips.TripColumns.HEADSIGN, Trips.TripColumns.DIRECTION_ID,Trips.TripColumns.BLOCK_ID,
+                            Trips.TripColumns.WHEELCHAIR_ACCESSIBLE, sql.toString()));
+                    Log.e("ATG", "fin insertion Stop");
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
+        } catch (IOException ignored) {
+        }
+
+        String countStopTimes = "SELECT  count(*) FROM " + StopTimes.CONTENT_PATH;
+        String countBusRoutes = "SELECT  count(*) FROM " + BusRoutes.CONTENT_PATH;
+        String countCalendar = "SELECT  count(*) FROM " + Calendar.CONTENT_PATH;
+        String countStops = "SELECT  count(*) FROM " + Stops.CONTENT_PATH;
+        String countTrips = "SELECT  count(*) FROM " + Trips.CONTENT_PATH;
+
+        Cursor mCount= database.rawQuery(countStopTimes, null);
+        mCount.moveToFirst();
+        int countStopTimesInt= mCount.getInt(0);
+        mCount.close();
+
+        mCount= database.rawQuery(countBusRoutes, null);
+        mCount.moveToFirst();
+        int countBusRoutesInt= mCount.getInt(0);
+        mCount.close();
+
+        mCount= database.rawQuery(countCalendar, null);
+        mCount.moveToFirst();
+        int countCalendarInt= mCount.getInt(0);
+        mCount.close();
+
+        mCount= database.rawQuery(countStops, null);
+        mCount.moveToFirst();
+        int countStopsInt= mCount.getInt(0);
+        mCount.close();
+
+        mCount= database.rawQuery(countTrips, null);
+        mCount.moveToFirst();
+        int countTripsInt= mCount.getInt(0);
+        mCount.close();
+
+        Log.d("insertStopTimes", " countStopTimesInt = " + countStopTimesInt
+                + "countBusRoutesInt = " + countBusRoutesInt + "countCalendarInt = " + countCalendarInt
+                + "countStopsInt = " + countStopsInt + "countTripsInt = " + countTripsInt);
+    }
+
+
+
+
+    /**
      * @return
      */
     public ArrayList<BusRoute> getBusRoutesFromDatabase() {
@@ -442,7 +555,70 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
 
 
     /**
-     *
+     * @return
+     */
+    public ArrayList<Stop> getArretBusForBusDatabase(String idBus, String direction) {
+        String selectQuery = "SELECT DISTINCT " + Stops.CONTENT_PATH +
+                             ".* FROM " + Trips.CONTENT_PATH + "," + StopTimes.CONTENT_PATH + "," + Stops.CONTENT_PATH +
+                             " WHERE " + Trips.CONTENT_PATH + "." + Trips.TripColumns.TRIP_ID + "=" + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.TRIP_ID +
+                             " AND " + Stops.CONTENT_PATH + "." + Stops.StopColumns.STOP_ID + "=" + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_ID +
+                             " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.ROUTE_ID + " = '"+idBus+"' " +
+                             " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.DIRECTION_ID + " = '"+direction+"' " +
+                            "ORDER BY " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_SEQUENCE +" DESC";
+        ArrayList<Stop> data = new ArrayList<>();
+
+        try(Cursor cursor = this.getWritableDatabase().rawQuery(selectQuery, null)){
+            while (cursor.moveToNext()){
+                Stop item = new Stop(
+                        cursor.getString(cursor.getColumnIndex(Stops.StopColumns.STOP_ID)),
+                        cursor.getString(cursor.getColumnIndex(Stops.StopColumns.NAME)),
+                        cursor.getString(cursor.getColumnIndex(Stops.StopColumns.DESCRIPTION)),
+                        cursor.getFloat(cursor.getColumnIndex(Stops.StopColumns.LATITUDE)),
+                        cursor.getFloat(cursor.getColumnIndex(Stops.StopColumns.LONGITUDE)),
+                        cursor.getString(cursor.getColumnIndex(Stops.StopColumns.WHEELCHAIR_BOARDING)),
+                        cursor.getString(cursor.getColumnIndex(Stops.StopColumns.STOP_ID)));
+                data.add(item);
+            }
+        }
+
+        return data;
+    }
+
+
+
+    public ArrayList<StopTime> getHeurePassageFromDatabase(String idBus, String direction) {
+        String selectQuery = "SELECT " + StopTimes.CONTENT_PATH +
+                ".*, calendar.start_date, calendar.end_date  FROM " + StopTimes.CONTENT_PATH + "," + Trips.CONTENT_PATH + "," + Calendar.CONTENT_PATH +
+                " WHERE " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.TRIP_ID + "=" + Trips.CONTENT_PATH + "." + Trips.TripColumns.TRIP_ID +
+                " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.SERVICE_ID + "=" + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.SERVICE_ID +
+                " AND " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_ID + " = '1188' " +
+                " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.ROUTE_ID + " = '0004' " +
+                " AND time("+ StopTimes.CONTENT_PATH +"."+ StopTimes.StopTimeColumns.ARRIVAL_TIME +") >= time('10:40')" +
+                " AND " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.START_DATE + " <= current_date " +
+                " AND current_date <= " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.END_DATE +
+                " AND " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.SATURDAY + " = 1 " +
+                "ORDER BY " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.ARRIVAL_TIME +" asc";
+        ArrayList<StopTime> data = new ArrayList<>();
+
+        try(Cursor cursor = this.getWritableDatabase().rawQuery(selectQuery, null)){
+            while (cursor.moveToNext()){
+                StopTime item = new StopTime(
+                        cursor.getInt(cursor.getColumnIndex(StopTimes.StopTimeColumns.TRIP_ID)),
+                        cursor.getString(cursor.getColumnIndex(StopTimes.StopTimeColumns.ARRIVAL_TIME)),
+                        cursor.getString(cursor.getColumnIndex(StopTimes.StopTimeColumns.DEPARTURE_TIME)),
+                        cursor.getInt(cursor.getColumnIndex(StopTimes.StopTimeColumns.STOP_ID)),
+                        cursor.getString(cursor.getColumnIndex(StopTimes.StopTimeColumns.STOP_SEQUENCE))
+                        ) {
+                };
+                data.add(item);
+            }
+        }
+
+        return data;
+    }
+
+
+    /**
      * @param file
      * @throws IOException
      */
