@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 
+import com.example.constantlangnito.starv1dl.Table.BusRoute;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.BinaryHttpResponseHandler;
 
@@ -29,6 +30,7 @@ import android.app.ProgressDialog;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onClick(View v) {
                 //Cursor list = databaseHelper.getArretBusForBusDatabase();
-                Intent intent = new Intent(MainActivity.this, fragment3.class);
+                Intent intent = new Intent(MainActivity.this, ListeArretBus.class);
                 Bundle vals = new Bundle();
                 vals.putString("dateDepart","0004");
                 vals.putString("heureDepart","1");
@@ -199,17 +201,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         DatabaseManager db = new DatabaseManager(getApplicationContext(),"");
 
         // Spinner Drop down elements
-        List<String> listeBus = db.getAllNameListeBus();
+        List<BusRoute> listeBus = db.getBusRoutesFromDatabase();
 
         // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
+       /* ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
                 android.R.layout.simple_spinner_item, listeBus);
 
         // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);*/
 
         // attaching data adapter to spinner
-        spinner_listeBus.setAdapter(dataAdapter);
+        //spinner_listeBus.setAdapter(dataAdapter);
+        spinner_listeBus.setAdapter(new LisBusAdapter(this, R.layout.bus_line, listeBus));
     }
 
 
