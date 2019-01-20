@@ -18,6 +18,7 @@ public class HeurePassageAdapter extends RecyclerView.Adapter<HeurePassageAdapte
 
     private List<StopTime> stopTime;
     Set<String> mId;
+
     private HeurePassageItemClickListener heurePassageItemClickListener;
 
     public HeurePassageAdapter(List<StopTime> stopTime) {
