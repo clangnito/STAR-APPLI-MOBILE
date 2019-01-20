@@ -3,18 +3,23 @@ package com.example.constantlangnito.starv1dl;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TimePicker;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
 import com.loopj.android.http.AsyncHttpClient;
@@ -26,20 +31,10 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
-import android.app.ProgressDialog;
-import android.widget.DatePicker;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
 import cz.msebera.android.httpclient.Header;
 
-import static com.example.constantlangnito.starv1dl.VariablesStatic.zipFileUrl;
-
-
 import static android.os.Environment.getExternalStorageDirectory;
+import static com.example.constantlangnito.starv1dl.VariablesStatic.zipFileUrl;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -57,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public int positionBusSelect = 0;
     public int positionDirectionSelect = 0;
+    private Service service;
 
 
     java.util.Calendar c;
@@ -76,11 +72,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         setContentView(R.layout.activity_main);
-        databaseHelper = new DatabaseManager(getApplicationContext(),exportPath);
         activerPermissions(this);
-        final Service service = new Service();
+        databaseHelper = new DatabaseManager(getApplicationContext(),exportPath);
+        service = new Service();
         service.start();
         onNewIntent(getIntent());
+
 
         buttonTelecharger = (Button)findViewById(R.id.button_telechargement);
         buttonLister = (Button)findViewById(R.id.button_listerBus);
@@ -192,6 +189,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
     }
+    @Override
+    protected void onResume(){
+        super.onResume();
+    }
 
 
 
@@ -202,16 +203,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         // Spinner Drop down elements
         List<BusRoute> listeBus = db.getBusRoutesFromDatabase();
-
-        // Creating adapter for spinner
-       /* ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
-                android.R.layout.simple_spinner_item, listeBus);
-
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);*/
-
-        // attaching data adapter to spinner
-        //spinner_listeBus.setAdapter(dataAdapter);
         spinner_listeBus.setAdapter(new LisBusAdapter(this, R.layout.bus_line, listeBus));
     }
 

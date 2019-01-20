@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
@@ -45,7 +43,8 @@ class LisBusAdapter extends ArrayAdapter<BusRoute> {
         View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.bus_line, parent, false);
         final TextView label = row.findViewById(R.id.label);
         label.setText(mRoutes.get(position).getshortName());
-        
+        label.setTextColor(Color.parseColor("#" + mRoutes.get(position).getTextColor()));
+       label.setBackgroundColor(Color.parseColor("#" + mRoutes.get(position).getColor()));
         final TextView line = row.findViewById(R.id.line);
         line.setText(mRoutes.get(position).getRoute_long_name());
         return row;
