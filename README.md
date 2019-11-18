@@ -8,3 +8,5 @@ Ci-dessous les capture d'écran.
 
 
 ![Selection de date et heure](1.jpg)
+![Selection de date et heure](2.jpg)
+![Selection de date et heure](3.jpg)
