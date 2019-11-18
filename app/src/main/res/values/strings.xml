@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">StarV1DL</string>
+    <string name="app_name">StarV2DL</string>
     <string name="title_activity_lister_bus_metro">ListerBusMetro</string>
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_liste_arret_bus">Liste Arret Bus</string>

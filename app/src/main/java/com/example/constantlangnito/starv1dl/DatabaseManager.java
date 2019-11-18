@@ -588,7 +588,7 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
 
 
 
-    public ArrayList<StopTime> getHeurePassageFromDatabase(String dateDepart, String heureDepart, int positionBusSelect, int positionDirectionSelect,int positionArretSelect,String idBus) {
+    public ArrayList<StopTime> getHeurePassageFromDatabase(String dateDepart, String heureDepart, int positionBusSelect, int positionDirectionSelect,int positionArretSelect,String idBus,String ArretBus_ID) {
 
 
         /*ArrayList<Stop> listeStopDataBase = this.getArretBusForBusDatabase(,positionArretSelect);
@@ -601,7 +601,7 @@ public class DatabaseManager extends SQLiteOpenHelper implements StarContract {
                 ".*, calendar.start_date, calendar.end_date  FROM " + StopTimes.CONTENT_PATH + "," + Trips.CONTENT_PATH + "," + Calendar.CONTENT_PATH +
                 " WHERE " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.TRIP_ID + "=" + Trips.CONTENT_PATH + "." + Trips.TripColumns.TRIP_ID +
                 " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.SERVICE_ID + "=" + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.SERVICE_ID +
-                " AND " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_ID + " = '1188' " +
+                " AND " + StopTimes.CONTENT_PATH + "." + StopTimes.StopTimeColumns.STOP_ID + " = '"+ArretBus_ID+"' " +
                 " AND " + Trips.CONTENT_PATH + "." + Trips.TripColumns.ROUTE_ID + " = '"+idBus+"' " +
                 " AND time("+ StopTimes.CONTENT_PATH +"."+ StopTimes.StopTimeColumns.ARRIVAL_TIME +") >= time('"+heureDepart+"')" +
                 " AND " + Calendar.CONTENT_PATH + "." + Calendar.CalendarColumns.START_DATE + " <= '"+ formatDateStar(dateDepart) +"' " +

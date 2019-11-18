@@ -30,6 +30,8 @@ public class fragment3 extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+
         Bundle vals = getIntent().getExtras();
         String dateDepart = vals.getString("dateDepart");
         String heureDepart = vals.getString("heureDepart");
@@ -37,6 +39,10 @@ public class fragment3 extends AppCompatActivity {
         int positionDirectionSelect = vals.getInt("positionDirectionSelect");
         int positionArretSelect = vals.getInt("positionArretSelect");
         String Route_id = vals.getString("Route_id");
+        String ArretBus_ID = vals.getString("ArretBus_ID");
+
+        setTitle("Arret Bus : "+ vals.getString("ArretBus"));
+        //setContentView(R.layout.main);
 
         db = new DatabaseManager(this,"");
 
@@ -46,7 +52,7 @@ public class fragment3 extends AppCompatActivity {
 
         //String idBus = stopTime.getRoute_id();
 
-        ArrayList list = db.getHeurePassageFromDatabase(dateDepart,heureDepart,positionBusSelect,positionDirectionSelect,positionArretSelect,Route_id);
+        ArrayList list = db.getHeurePassageFromDatabase(dateDepart,heureDepart,positionBusSelect,positionDirectionSelect,positionArretSelect,Route_id,ArretBus_ID);
 
         lv = findViewById(R.id.recycler_viewHeurePassage);
         lv.setHasFixedSize(true);

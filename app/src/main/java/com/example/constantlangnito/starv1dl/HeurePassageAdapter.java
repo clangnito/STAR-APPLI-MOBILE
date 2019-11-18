@@ -10,6 +10,10 @@ import android.widget.TextView;
 import com.example.constantlangnito.starv1dl.Table.Stop;
 import com.example.constantlangnito.starv1dl.Table.StopTime;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +44,25 @@ public class HeurePassageAdapter extends RecyclerView.Adapter<HeurePassageAdapte
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
         final StopTime stoptimeB = stopTime.get(position);
         viewHolder.heurePassage.setText(stoptimeB.getDeparture_time());
+
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date date1 = new Date();
+        String sDate1=dateFormat.format(date1)+ " "+stoptimeB.getDeparture_time() ;
+        Date date2= null;
+        try {
+            date2 = new SimpleDateFormat().parse(sDate1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        long diffMin = Math.abs(date1.getTime() - date2.getTime()) / 60000l;
+        long min = diffMin%60l;
+        long hour = diffMin/60l;
+        if (hour == 0)
+            viewHolder.tempRestant.setText( min+" mn");
+        else
+            viewHolder.tempRestant.setText(hour + " h:" + min+" mn");
+
     }
 
 
@@ -55,12 +78,14 @@ public class HeurePassageAdapter extends RecyclerView.Adapter<HeurePassageAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected TextView heurePassage;
+        protected TextView tempRestant;
 
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             mId = new HashSet<String>();
             heurePassage = itemView.findViewById(R.id.heurepassage);
+            tempRestant = itemView.findViewById(R.id.tempRestant);
             itemView.setOnClickListener(this);
         }
 

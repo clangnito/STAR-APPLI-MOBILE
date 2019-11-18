@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.constantlangnito.starv1dl.Table.BusRoute;
+import com.example.constantlangnito.starv1dl.Table.Stop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,9 @@ public class ListeArretBus extends AppCompatActivity {
     int positionBusSelect ;
     int positionDirectionSelect ;
     String Route_id;
+    ArrayList<BusRoute> listeBusDataBase;
+    ArrayList listArretBus;
+
 
 
     @Override
@@ -48,19 +52,26 @@ public class ListeArretBus extends AppCompatActivity {
 
         db = new DatabaseManager(this,"");
 
-        ArrayList<BusRoute> listeBusDataBase = db.getBusRoutesFromDatabase();
+        listeBusDataBase = db.getBusRoutesFromDatabase();
 
         BusRoute busRoute = listeBusDataBase.get(positionBusSelect);
 
         String idBus = busRoute.getRoute_id();
+        String shortName = busRoute.getshortName();
+        String Route_desc = busRoute.getRoute_long_name();
+
+        String[] splits;
+        splits = Route_desc.split("<>");
+
+        setTitle("Bus : "+ shortName + " -> " + splits[positionDirectionSelect]);
         Route_id = idBus;
-        ArrayList list = db.getArretBusForBusDatabase(idBus,Integer.toString(positionDirectionSelect) );
+        listArretBus = db.getArretBusForBusDatabase(idBus,Integer.toString(positionDirectionSelect) );
 
         lv = findViewById(R.id.recycler_viewListeArretBus);
         lv.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(this);
         lv.setLayoutManager(layoutManager);
-        adapter = new ArretBusAdapter(list);
+        adapter = new ArretBusAdapter(listArretBus);
         lv.setAdapter(adapter);
     }
 
@@ -72,6 +83,10 @@ public class ListeArretBus extends AppCompatActivity {
             public void onItemClick(int possition, View view) {
                 Toast.makeText(ListeArretBus.this, "Selectionnez une ligne "+possition, Toast.LENGTH_SHORT).show();
 
+                String ArretBus_ID = ((Stop) listArretBus.get(possition)).getId();
+                String ArretBus = ((Stop) listArretBus.get(possition)).getName();
+
+
                 Intent intent = new Intent(ListeArretBus.this, fragment3.class);
                 Bundle vals = new Bundle();
                 vals.putString("dateDepart",dateDepart);
@@ -79,6 +94,8 @@ public class ListeArretBus extends AppCompatActivity {
                 vals.putInt("positionBusSelect",positionBusSelect);
                 vals.putInt("positionDirectionSelect", positionDirectionSelect);
                 vals.putInt("positionArretSelect", possition);
+                vals.putString("ArretBus_ID", ArretBus_ID );
+                vals.putString("ArretBus", ArretBus );
                 vals.putString("Route_id", Route_id);
                 intent.putExtras(vals);
                 startActivity(intent);
